@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Daily BRVM – CGF Bourse</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="style.css?v=20261113m">
+</head>
+<body>
+<header class="top">
+  <div class="top-in">
+    <div class="brand">
+      <div class="logo" aria-label="CGF Bourse">CGF</div>
+      <div>
+        <h1>Daily BRVM <span>· CGF Bourse</span></h1>
+        <div class="sub">Séance du <b id="seance">—</b> · mise à jour le <span id="maj">—</span></div>
+      </div>
+    </div>
+    <div class="right">
+    <div class="actions">
+      <a class="btn primary" href="Daily_BRVM.xlsx" download><span>Excel<span class="lbl-long"> du jour</span></span></a>
+      <a class="btn csv" href="data/titres.csv" download title="CSV titres" aria-label="CSV titres"><span class="lbl">CSV titres</span></a>
+      <a class="btn csv" href="data/historique_cours.csv" download title="CSV historique" aria-label="CSV historique"><span class="lbl">CSV historique</span></a>
+      <button class="btn icon" id="theme" title="Thème clair / sombre" aria-label="Changer de thème"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg></button>
+    </div>
+    <div class="mstat" id="mstat" aria-live="polite"></div>
+    </div>
+    <div class="qbar" id="qualite" aria-label="Statut de la collecte et de la qualité des données"></div>
+  </div>
+  <div class="tape" aria-hidden="true"><div class="tape-in" id="tape"></div></div>
+</header>
+
+<main>
+  <section class="kpis" id="kpis" aria-label="Chiffres clés">
+    <div class="kpi sk"><span class="l">.</span><span class="v">.</span><span class="d">.</span></div>
+    <div class="kpi sk"><span class="l">.</span><span class="v">.</span><span class="d">.</span></div>
+    <div class="kpi sk"><span class="l">.</span><span class="v">.</span><span class="d">.</span></div>
+    <div class="kpi sk"><span class="l">.</span><span class="v">.</span><span class="d">.</span></div>
+    <div class="kpi sk"><span class="l">.</span><span class="v">.</span><span class="d">.</span></div>
+  </section>
+  <p class="note bases" id="bases"></p>
+  <p class="loading" id="loading">Chargement des données de la séance…</p>
+
+  <nav class="tabs" id="tabs">
+    <button data-tab="marche" class="on">Marché</button>
+    <button data-tab="titre">Analyse d'un titre</button>
+    <button data-tab="comparer">Comparateur</button>
+    <button data-tab="screener">Screener</button>
+    <button data-tab="recos">Recommandations</button>
+    <button data-tab="risque">Risque &amp; corrélations</button>
+    <button data-tab="dividendes">Dividendes</button>
+    <button data-tab="obligations">Obligations</button>
+    <button data-tab="historique">Historique</button>
+  </nav>
+  <div class="mk-menu" id="mk-menu" hidden></div>
+
+  <!-- MARCHÉ -->
+  <section class="panel" data-panel="marche">
+    <nav class="subnav" id="mk-nav" aria-label="Rubriques du marché"></nav>
+
+    <!-- Résumé du jour -->
+    <div class="mview" data-mview="resume">
+      <div class="mk-head"><div><h2 class="pg-t">Résumé du marché</h2><p class="note" id="rj-meta"></p></div></div>
+      <div class="grid g-rj">
+        <div class="card resume-j">
+          <div class="card-h"><div><h2>Note de séance</h2><p class="note">Rédigée automatiquement à partir des données publiées par la BRVM ; elle n'a pas été relue par un analyste.</p></div></div>
+          <div class="rj-stats" id="rj-stats"></div>
+          <p class="comment" id="commentaire"></p>
+        </div>
+        <div>
+          <p class="sec-t" style="margin-top:0">Profondeur du marché</p>
+          <div class="depth" id="mk-depth"></div>
+        </div>
+      </div>
+
+      <h2 class="sec-t">Indices</h2>
+      <div class="idx-cards" id="idx-cards"></div>
+      <p class="note" style="margin:-4px 0 12px">Période des courbes : <span class="seg inline" id="idx-cards-per"></span></p>
+
+      <div class="card">
+        <div class="card-h"><div><h2>Carte du marché</h2><p class="note" id="tm-note">Taille = capitalisation · couleur = performance. Cliquez sur un titre pour l'analyser.</p></div>
+          <div class="ctrls"><div class="seg" id="tm-metric"></div><div class="seg" id="tm-group"></div></div></div>
+        <div class="legend tm-leg" id="tm-leg"></div>
+        <div class="chart" id="treemap" style="height:460px"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-h"><div><h2>Mouvements du jour</h2><p class="note">Les 6 plus fortes hausses, baisses ou valeurs échangées de la séance. Le classement complet par période est dans le Palmarès.</p></div><div class="seg" id="mv-f"></div></div>
+        <div id="mv-list" class="mv-list cols2"></div>
+        <p class="note" id="mv-src"></p>
+      </div>
+    </div>
+
+    <!-- Séance en direct -->
+    <div class="mview" data-mview="seance" hidden>
+      <div class="mk-head"><div><h2 class="pg-t">Séance en direct</h2><p class="note" id="sj-meta"></p></div><div class="mstat big" id="sj-stat"></div></div>
+      <div class="live-idx" id="lv-idx"></div>
+      <div class="card">
+        <div class="card-h"><div><h2>Titre</h2><p class="note" id="lv-tnote"></p></div><div class="ctrls"><select id="lv-sel"></select></div></div>
+        <div class="lv-kpis" id="lv-kpis"></div>
+        <div class="grid g-lv">
+          <div><h3 class="lv-h">Évolution pendant la séance</h3><div class="chart" id="lv-chart" style="height:280px"></div><div class="chart" id="lv-vol" style="height:80px"></div></div>
+          <div><h3 class="lv-h">Relevés du titre</h3><div class="scroll" style="max-height:340px"><table class="tbl compact" id="lv-rel"></table></div></div>
+        </div>
+      </div>
+      <div class="grid g2">
+        <div class="card"><h2>BRVM Composite pendant la séance</h2><p class="note">Niveau à chaque relevé</p><div class="chart" id="lv-comp" style="height:240px"></div></div>
+        <div class="card"><h2>Déroulement de la séance</h2><p class="note">Horaires normaux de la BRVM, heure de Dakar et d'Abidjan (GMT). La phase en cours est surlignée.</p><div class="phases" id="sj-phases"></div>
+          <p class="note" id="lv-releves" style="margin-top:12px"></p></div>
+      </div>
+      <div class="card">
+        <div class="card-h"><div><h2 id="sj-ttl">Cotations</h2><p class="note" id="sj-src"></p></div>
+          <div class="ctrls"><input type="search" id="sj-q" placeholder="Rechercher…"><div class="seg" id="sj-f"></div></div></div>
+        <div class="scroll tall"><table class="tbl" id="sj-table"></table></div>
+      </div>
+      <p class="note" id="lv-foot"></p>
+    </div>
+
+    <!-- Palmarès -->
+    <div class="mview" data-mview="palmares" hidden>
+      <div class="mk-head"><div><h2 class="pg-t">Palmarès</h2><p class="note">Performances de toutes les actions de la BRVM, du jour à cinq ans</p></div></div>
+      <div class="card ref-row" id="pm-ref"></div>
+      <div class="card">
+        <div class="card-h"><div><p class="note" id="pm-count"></p></div>
+          <div class="ctrls"><input type="search" id="pm-q" placeholder="Rechercher une société ou un symbole…"><select id="pm-sec"></select><select id="pm-pays"></select><button class="btn" id="pm-reset">Réinitialiser</button></div></div>
+        <div class="scroll tall"><table class="tbl" id="pm-table"></table></div>
+        <p class="note">Performances calculées sur les cours de clôture ajustés des opérations sur titres, hors dividendes. 3 et 5 ans : seulement pour un titre déjà coté au début de la période. Cliquez sur un en-tête pour trier, sur une ligne pour analyser le titre.</p>
+      </div>
+    </div>
+
+    <!-- Indices et secteurs -->
+    <div class="mview" data-mview="indices" hidden>
+      <div class="mk-head"><div><h2 class="pg-t">Indices BRVM</h2><p class="note" id="ix-meta"></p></div></div>
+      <div id="ix-list">
+      <h3 class="ix-grp">Indices de marché</h3>
+      <div class="ix-cards" id="ix-main"></div>
+      <h3 class="ix-grp" id="ix-sec-h">Indices sectoriels</h3>
+      <div class="ix-cards sm" id="ix-sec"></div>
+      <div class="card ix-hz-card">
+        <h3 class="ix-grp" style="margin-top:0">Performances par horizon</h3>
+        <div class="scroll"><table class="tbl ix-hz" id="ix-hz"></table></div>
+        <p class="note" id="ix-hz-note"></p>
+      </div>
+      <div class="ix-rt">
+        <div class="ix-eyebrow">Calcul Daily BRVM</div>
+        <h2 class="ix-rt-h">Rendement du marché sur notre historique</h2>
+        <p class="note" id="ix-rt-note"></p>
+        <div class="ix-rt-k" id="ix-rt-k"></div>
+        <div class="card"><div class="chart" id="ix-rt-chart" style="height:340px"></div></div>
+      </div>
+      <div class="card">
+        <div class="card-h">
+          <div><h2>Comparer les indices</h2><p class="note">Base 100 au début de la période. Survolez pour lire les valeurs.</p></div>
+          <div class="ctrls"><div class="chips" id="idx-pick"></div><div class="seg" id="idx-per"></div></div>
+        </div>
+        <div class="chart" id="idx-chart" style="height:360px"></div>
+      </div>
+      <div class="grid g2">
+        <div class="card"><div class="card-h"><div><h2>Secteurs</h2><p class="note">Performance des indices sectoriels ; en dessous : poids, hausses et baisses, PER et rendement médians</p></div><div class="seg" id="sec-per"></div></div>
+          <div class="chart" id="sec-chart" style="height:230px"></div>
+          <div class="scroll"><table class="tbl compact" id="sec-table"></table></div></div>
+        <div class="card"><div class="card-h"><div><h2>Largeur du marché</h2><p class="note">Part des titres en hausse sur 20 séances glissantes</p></div></div><div class="chart" id="breadth" style="height:260px"></div></div>
+      </div>
+      </div>
+      <div id="ix-page" hidden>
+        <nav class="ix-anchors" id="ix-anchors">
+          <button type="button" class="ix-back" id="ix-back">← Tous les indices</button>
+          <button type="button" data-a="ix-s-ess" class="on">Essentiel</button>
+          <button type="button" data-a="ix-s-plus">Aller plus loin</button>
+          <button type="button" data-a="ix-s-av">Analyse avancée</button>
+        </nav>
+        <section id="ix-s-ess" class="ix-sec">
+          <div class="ix-title"><h2 id="ix-name"></h2><select id="ix-pick" aria-label="Choisir un indice"></select></div>
+          <p class="note" id="ix-desc"></p>
+          <div class="card ix-kpis" id="ix-kpis"></div>
+          <div class="card">
+            <div class="ix-bar"><div class="seg" id="ix-per"></div><div class="ix-ov" id="ix-ov"></div></div>
+            <div class="chart" id="ix-chart" style="height:360px"></div>
+            <p class="note" id="ix-cnote"></p>
+            <div id="ix-macd-w" hidden><h3 class="ix-sub">MACD (12, 26, 9)</h3><div class="chart" id="ix-macd" style="height:170px"></div></div>
+            <div id="ix-rsi-w" hidden><h3 class="ix-sub">RSI (14 séances)</h3><div class="chart" id="ix-rsi" style="height:170px"></div></div>
+            <p class="note" id="ix-ovnote"></p>
+          </div>
+          <div class="card"><h3 class="ix-h">Performance — vue rapide</h3><div id="ix-quick"></div></div>
+        </section>
+        <section id="ix-s-plus" class="ix-sec">
+          <div class="ix-eyebrow">Analyse complète</div>
+          <h2 class="ix-sh">Aller plus loin</h2>
+          <p class="note">Le détail des performances et les repères de la période choisie.</p>
+          <div class="card"><h3 class="ix-h">Performance détaillée</h3><div id="ix-perf"></div></div>
+          <div class="card"><h3 class="ix-h">Repères de la période</h3><div id="ix-reperes"></div></div>
+        </section>
+        <section id="ix-s-av" class="ix-sec">
+          <div class="ix-eyebrow">Pour les utilisateurs expérimentés</div>
+          <h2 class="ix-sh">Analyse avancée</h2>
+          <p class="note">Indicateurs de risque statistiques calculés sur l'historique de l'indice.</p>
+          <div class="card"><h3 class="ix-h">Indicateurs de risque</h3><div id="ix-risk"></div></div>
+        </section>
+      </div>
+    </div>
+  </section>
+
+  <!-- TITRE -->
+  <section class="panel" data-panel="titre" hidden>
+    <div class="card">
+      <div class="card-h">
+        <div class="pick"><select id="t-sel"></select><button class="btn" id="t-cmp" title="Ouvrir ce titre dans le Comparateur">Comparer</button><button class="btn" id="t-cmp-sec" title="Comparer ce titre avec les titres les plus échangés de son secteur">Comparer avec son secteur</button><span class="note" id="t-meta"></span></div>
+      </div>
+      <p class="synth" id="t-synth"></p>
+      <div class="blocs" id="t-fiche"></div>
+      <div class="range" id="t-range"></div>
+      <p class="note">Survolez un indicateur (ⓘ) pour sa définition.</p>
+    </div>
+    <div class="card">
+      <div class="card-h"><div><h2>Évolution du cours</h2><p class="note">Cours de clôture ajusté, moyennes mobiles et volumes échangés</p></div>
+        <div class="ctrls"><div class="chips" id="t-ov"></div><div class="seg" id="t-per"></div></div></div>
+      <div class="chart" id="t-price" style="height:360px"></div>
+      <div class="chart" id="t-vol" style="height:90px"></div>
+    </div>
+    <div class="grid g2">
+      <div class="card"><h2>Comparaison avec le marché</h2><p class="note">Le titre, son secteur et le BRVM Composite, base 100 au début de la période</p><div class="chart" id="t-rel" style="height:260px"></div></div>
+      <div class="card"><h2>Baisse depuis le plus haut</h2><p class="note">Écart entre le cours et son plus haut de la période : mesure le risque de perte</p><div class="chart" id="t-dd" style="height:260px"></div></div>
+    </div>
+    <div class="card">
+      <div class="card-h"><div><h2>Comparaison avec les titres du secteur</h2><p class="note" id="t-peers-note"></p></div></div>
+      <div class="scroll"><table class="tbl" id="t-peers"></table></div>
+    </div>
+  </section>
+
+  <!-- COMPARATEUR (lot 8) -->
+  <section class="panel" data-panel="comparer" hidden>
+    <div class="print-head" aria-hidden="true"><b>CGF Bourse · Daily BRVM</b> · Fiche comparative · <span id="cp-print-date"></span></div>
+    <div class="card cp-pick">
+      <div class="card-h">
+        <div><h2>Comparateur de titres</h2><p class="note">Choisissez de 2 à 4 titres. La sélection est gardée dans l'adresse de la page : vous pouvez la partager.</p></div>
+        <div class="ctrls no-print">
+          <input list="cp-list" id="cp-q" placeholder="Nom ou symbole…" autocomplete="off"><datalist id="cp-list"></datalist>
+          <button class="btn" id="cp-add">Ajouter</button>
+          <button class="btn" id="cp-reset">Réinitialiser</button>
+          <button class="btn" id="cp-print">Imprimer / PDF</button>
+          <button class="btn" id="cp-xlsx">Excel</button>
+        </div>
+      </div>
+      <div class="chips cp-sel" id="cp-sel"></div>
+      <p class="no-print" style="margin:8px 0 0"><button class="btn" id="cp-sect" hidden></button></p>
+      <p class="note no-print" id="cp-sugg"></p>
+    </div>
+    <div id="cp-body">
+      <div class="card avert cp-mix" id="cp-mix" role="note" hidden></div>
+      <div class="cp-cards" id="cp-cards"></div>
+      <div class="grid g2">
+        <div class="card"><h2>Profil comparé</h2><p class="note">Position de chaque titre dans le marché, de 0 (le plus faible des titres cotés) à 100 (le plus fort), sur six critères.</p><div class="chart" id="cp-radar" style="height:380px"></div><div class="legend" id="cp-radar-leg"></div></div>
+        <div class="card"><h2>Qui mène sur quel critère ?</h2><p class="note">Le meilleur des titres choisis sur chaque critère, et son avance sur le suivant.</p><div id="cp-verdict"></div></div>
+      </div>
+      <div class="card cp-story"><h2>Ce qu'il faut retenir</h2><ul class="cp-synth" id="cp-synth"></ul></div>
+      <div class="card">
+        <div class="card-h"><div><h2>Évolution des cours</h2><p class="note">Base 100 au début de la période, sur les seules dates où tous les titres choisis ont un cours (dividendes non inclus).</p></div><div class="ctrls"><div class="seg" id="cp-per"></div></div></div>
+        <div class="chart" id="cp-chart" style="height:340px"></div>
+      </div>
+      <div class="grid g2">
+        <div class="card"><h2>Performances par période</h2><p class="note">Trait pointillé : BRVM Composite sur la même période</p><div class="chart" id="cp-perfbars" style="height:300px"></div></div>
+        <div class="card"><h2>Face aux hausses et aux baisses du marché</h2><p class="note">Variation moyenne du titre les jours où le BRVM Composite monte et les jours où il baisse, sur 1 an ; trait pointillé : le Composite</p><div class="chart" id="cp-dd" style="height:300px"></div></div>
+      </div>
+      <div class="grid g2">
+        <div class="card"><h2>Évoluent-ils ensemble ?</h2><p class="note">Corrélation des rendements quotidiens sur 1 an : proche de 1, les titres montent et baissent ensemble ; proche de 0, ils se diversifient.</p><div id="cp-corr"></div></div>
+        <div class="card"><h2>Leur place dans le marché</h2><p class="note">La carte rendement / risque de tous les titres cotés est dans l'onglet Risque. Ouvrez-la avec vos titres mis en évidence.</p>
+          <p style="margin-top:14px"><button class="btn primary" id="cp-rk">Voir ces titres sur la carte rendement / risque →</button></p></div>
+      </div>
+      <div class="grid g2">
+        <div class="card"><h2>Dividendes 2022-2025</h2><p class="note">Dividende net par action, ajusté des opérations sur titres ; rendement historique = dernier dividende / cours</p><div id="cp-divviz"></div></div>
+        <div class="card"><h2>Résultats et liquidité</h2><p class="note">Résultat net en base 100 en 2022, et valeur médiane échangée par séance (seuils 10 et 35 M FCFA)</p><div class="chart" id="cp-rn" style="height:200px"></div><div class="chart" id="cp-liqbars" style="height:150px"></div></div>
+      </div>
+      <details class="method cp-details" open><summary>Tableaux détaillés</summary>
+        <h3>Vue d'ensemble</h3><div class="scroll"><table class="tbl cp" id="cp-vue"></table></div>
+        <h3>Performances</h3><div class="scroll"><table class="tbl cp" id="cp-perf"></table></div>
+        <div class="grid g2">
+          <div><h3>Dividendes</h3><div class="scroll"><table class="tbl cp" id="cp-div"></table></div></div>
+          <div><h3>Liquidité</h3><div class="scroll"><table class="tbl cp" id="cp-liq"></table></div></div>
+        </div>
+        <div class="grid g2">
+          <div><h3>Risque</h3><div class="scroll"><table class="tbl cp" id="cp-risk"></table></div></div>
+          <div><h3>Fondamentaux</h3><div class="scroll"><table class="tbl cp" id="cp-fond"></table></div></div>
+        </div>
+      </details>
+      <p class="note cp-notes" id="cp-notes"></p>
+    </div>
+  </section>
+
+  <!-- SCREENER -->
+  <section class="panel" data-panel="screener" hidden>
+    <div class="mk-head"><div><h2 class="pg-t">Screener</h2><p class="note">Trouvez en quelques clics les actions de la BRVM qui correspondent à ce que vous cherchez.</p></div></div>
+    <ol class="sc-how">
+      <li><b>1</b><span><strong>Choisissez une question</strong> ci-dessous, ou réglez les menus « Affinez ».</span></li>
+      <li><b>2</b><span><strong>Lisez la liste</strong> : cliquez sur une action pour ouvrir son analyse, sur un en-tête pour trier.</span></li>
+      <li><b>3</b><span><strong>Cochez 2 à 4 actions</strong> pour les comparer, ou ☆ pour les suivre dans « Ma surveillance ».</span></li>
+    </ol>
+    <h3 class="sc-step">Que cherchez-vous ?</h3>
+    <div class="sc-q" id="sc-presets"></div>
+    <div class="card sc-box">
+      <h3 class="sc-step" style="margin-top:0">Affinez <span class="note">facultatif</span></h3>
+      <div class="sc-simple" id="sc-simple"></div>
+      <div class="sc-active" id="sc-active"></div>
+      <details class="sc-more"><summary>Filtres avancés : valeurs minimales et maximales sur chaque indicateur</summary><div class="sc-cats" id="sc-cats"></div></details>
+    </div>
+    <div class="sc-sum" id="sc-sum"></div>
+    <div class="card">
+      <div class="card-h"><div><h2 id="sc-count">Résultats</h2><p class="note" id="sc-phrase"></p></div>
+        <div class="ctrls"><input type="search" id="sc-q2" placeholder="Rechercher une action…"><div class="colpick"><button class="btn" id="sc-colbtn">Colonnes ▾</button><div class="colmenu" id="sc-cols" hidden></div></div>
+          <button class="btn" id="sc-csv">CSV</button><button class="btn" id="sc-fiche" disabled>Fiche d'analyse</button><button class="btn primary" id="sc-cmp" disabled>Comparer</button></div></div>
+      <div class="sc-sortinfo note" id="sc-sortinfo"></div>
+      <div class="scroll tall"><table class="tbl sc-t" id="sc-table"></table></div>
+      <p class="note">Survolez un en-tête de colonne pour savoir ce qu'il mesure. Maj + clic sur un en-tête : ajouter un second critère de tri. « n.d. » : donnée non disponible (le titre est alors écarté par un filtre sur cette donnée, jamais compté comme zéro). Ce sont des données descriptives, pas des recommandations d'investissement.</p>
+    </div>
+    <div class="card watch" id="wt-card"></div>
+    <details class="method" id="sc-doc"><summary>Documentation des indicateurs du Screener</summary></details>
+  </section>
+
+  <!-- RECOMMANDATIONS (lot 8) -->
+  <section class="panel" data-panel="recos" hidden>
+    <div class="card avert" role="note"><b>Avertissement :</b> <span id="rc-avert"></span> <span class="note" id="rc-meta"></span></div>
+    <div class="kpis small rc-kpis" id="rc-kpis"></div>
+    <div class="card" id="rc-chg-card" hidden><h2>Changements depuis la séance précédente</h2><ul class="rc-chg" id="rc-chg"></ul></div>
+    <div class="card">
+      <div class="card-h">
+        <div><h2>Diagnostic par titre</h2><p class="note">▲ favorable · ● neutre · ▼ défavorable · – indisponible. Cliquez sur une ligne pour la fiche détaillée.</p></div>
+        <div class="ctrls">
+          <input type="search" id="rc-q" placeholder="Rechercher…">
+          <select id="rc-cat"></select>
+          <select id="rc-sec"></select>
+          <select id="rc-liq"><option value="">Toute liquidité</option><option value="élevée">Liquidité élevée</option><option value="moyenne">Liquidité moyenne</option><option value="faible">Liquidité faible</option><option value="données insuffisantes">Données insuffisantes</option></select>
+        </div>
+      </div>
+      <div class="scroll tall"><table class="tbl" id="rc-table"></table></div>
+    </div>
+    <div class="card rc-fiche" id="rc-fiche"></div>
+    <details class="method" id="rc-methode"><summary>Méthode du diagnostic</summary></details>
+  </section>
+
+  <!-- RISQUE -->
+  <section class="panel" data-panel="risque" hidden>
+    <div class="mk-head"><div><h2 class="pg-t">Risque et corrélations</h2><p class="note" id="rk-sub">Volatilité, performance et liens entre titres, calculés sur les cours de clôture de la BRVM</p></div>
+      <div class="ctrls"><button class="btn" id="rk-fiche" disabled title="Choisissez des titres sur la carte">Fiche d'analyse des titres choisis</button></div></div>
+    <div class="sc-sum rk-kpis" id="rk-kpis"></div>
+
+    <div class="card rk-syn"><div class="card-h"><div><h2>Synthèse du risque et des corrélations</h2><p class="note" id="rk-syn-note"></p></div></div><ul class="cp-synth" id="rk-syn"></ul></div>
+
+    <div class="card">
+      <div class="card-h">
+        <div><h2>Carte rendement / risque</h2><p class="note" id="rk-note"></p></div>
+        <div class="ctrls"><div class="seg" id="rk-per"></div></div>
+      </div>
+      <div class="rk-tools">
+        <div class="chips" id="rk-secs"></div>
+        <div class="rk-pick"><input type="search" id="rk-hl" placeholder="Choisir un titre…" list="rk-list"><datalist id="rk-list"></datalist><span class="chips" id="rk-chosen"></span></div>
+      </div>
+      <div class="grid g-rk">
+        <div class="chart" id="scatter" style="height:500px"></div>
+        <aside class="rk-side" id="rk-side"></aside>
+      </div>
+      <div class="rk-quads" id="rk-quads"></div>
+      <details class="method"><summary>Axes personnalisés</summary>
+        <div class="ctrls" style="margin:10px 0"><label class="note">Axe X <select id="sx"></select></label><label class="note">Axe Y <select id="sy"></select></label><button class="btn" id="rk-axreset">Revenir à volatilité / performance</button></div>
+        <p class="note">Les axes personnalisés utilisent les mesures à 1 an du tableau des titres. Les zones descriptives ne s'affichent que pour volatilité / performance.</p>
+      </details>
+    </div>
+
+    <div class="card">
+      <div class="card-h"><div><h2>Matrice de corrélation</h2><p class="note" id="hm-note"></p></div><div class="ctrls"><div class="seg" id="hm-mode"></div></div></div>
+      <div id="hm-syn"></div>
+      <div id="hm-det" hidden>
+        <div class="hm-tools">
+          <label class="note">Titres <span class="seg inline" id="hm-n"></span></label>
+          <label class="note">Secteur <select id="hm-sec"></select></label>
+          <label class="note">Ordre <span class="seg inline" id="hm-ord"></span></label>
+          <span class="rk-pick"><input type="search" id="hm-add" placeholder="Ajouter un titre précis…" list="rk-list"><span class="chips" id="hm-chosen"></span></span>
+        </div>
+        <div class="hm-scale" id="hm-leg"></div>
+        <div class="chart" id="heatmap"></div>
+      </div>
+      <p class="note" id="hm-excl"></p>
+    </div>
+
+    <div class="grid g2">
+      <div class="card"><div class="card-h"><div><h2>Risque par secteur</h2><p class="note">Médianes des titres du secteur, mesures fiables à 1 an uniquement</p></div><div class="seg" id="rk-sec-m"></div></div><div class="chart" id="rk-sec" style="height:280px"></div></div>
+      <div class="card"><h2>Répartition des volatilités</h2><p class="note">Nombre de titres par tranche de volatilité annuelle (1 an)</p><div class="chart" id="rk-dist" style="height:280px"></div></div>
+    </div>
+    <div class="card">
+      <div class="card-h"><div><h2>Classement par le risque</h2><p class="note">Mesures à 1 an. Triez en cliquant sur un en-tête. « Peu fiable » : plus de 30 % de séances sans variation ou moins de 120 rendements.</p></div>
+        <div class="ctrls"><input type="search" id="rk-q" placeholder="Rechercher…"><select id="rk-fsec"></select><label class="note"><input type="checkbox" id="rk-fiab"> mesures fiables seulement</label></div></div>
+      <div class="scroll tall"><table class="tbl" id="rk-table"></table></div>
+    </div>
+    <details class="method" id="rk-doc"><summary>Documentation des indicateurs de risque</summary></details>
+  </section>
+
+  <!-- DIVIDENDES -->
+  <section class="panel" data-panel="dividendes" hidden>
+    <div class="mk-head"><div><h2 class="pg-t">Dividendes</h2><p class="note">Rendements, calendrier des détachements et historique 2022-2025 des sociétés cotées</p></div></div>
+    <div class="sc-sum" id="dv-kpis"></div>
+    <div class="card">
+      <div class="card-h"><div><h2>À venir</h2><p class="note" id="dv-next-note">AGO, détachements (ex-cote) et paiements annoncés, à partir d'aujourd'hui</p></div></div>
+      <div class="dv-next" id="dv-next"></div>
+    </div>
+    <div class="grid g2">
+      <div class="card"><div class="card-h"><div><h2>Rendement du dividende</h2><p class="note">Dividende de référence / cours · couleur : secteur · cliquez pour analyser le titre</p></div><select id="dv-fsec"></select></div><div class="chart" id="dv-chart" style="height:520px"></div></div>
+      <div>
+        <div class="card"><h2>Rendement par secteur</h2><p class="note">Rendement médian des sociétés qui versent un dividende</p><div class="chart" id="dv-sec" style="height:250px"></div></div>
+        <div class="card"><h2>Régularité 2022-2025</h2><p class="note">Nombre de sociétés selon le nombre d'exercices avec dividende</p><div class="chart" id="dv-reg" style="height:190px"></div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-h"><div><h2>Historique des dividendes</h2><p class="note">Dividende net par action, ajusté des opérations sur titres (FCFA). Triez en cliquant sur un en-tête.</p></div><input type="search" id="dv-hq" placeholder="Rechercher…"></div>
+      <div class="scroll tall"><table class="tbl" id="dv-hist"></table></div>
+    </div>
+    <div class="card">
+      <div class="card-h"><div><h2>Calendrier</h2><p class="note">Dividende de référence, AGO, ex-cote et paiement. Survolez une ligne pour le détail et la source.</p></div>
+        <div class="ctrls"><input type="search" id="dv-q" placeholder="Rechercher…"><select id="dv-st"><option value="">Tous les statuts</option><option value="payé">Payé</option><option value="décidé">Décidé</option><option value="aucun dividende">Aucun dividende</option><option value="ancien">Ancien</option></select></div></div>
+      <div class="scroll tall"><table class="tbl" id="dv-table"></table></div>
+    </div>
+  </section>
+
+  <!-- OBLIGATIONS -->
+  <section class="panel" data-panel="obligations" hidden>
+    <div class="mk-head"><div><h2 class="pg-t">Obligations et taux</h2><p class="note" id="ob-src"></p></div></div>
+    <div class="sc-sum ob-sum" id="ob-kpis"></div>
+    <div class="card">
+      <div class="card-h">
+        <div><h2>Courbe des taux</h2><p class="note">Rendement actuariel estimé selon la durée restante, par pays émetteur. Une courbe ajustée relie les points de chaque pays. Cliquez sur un pays pour l'afficher ou le masquer.</p></div>
+      </div>
+      <div class="chips" id="ob-pays"></div>
+      <div class="chart" id="ob-curve" style="height:420px"></div>
+    </div>
+    <div class="grid g2">
+      <div class="card"><h2>Rendement médian par pays</h2><p class="note">Obligations souveraines, rendement actuariel estimé (lignes fiables ou estimées)</p><div class="chart" id="ob-bars" style="height:260px"></div></div>
+      <div class="card"><h2>Échéancier</h2><p class="note">Nombre de lignes cotées arrivant à échéance chaque année, par type d'émetteur</p><div class="chart" id="ob-ech" style="height:260px"></div><div class="legend" id="ob-ech-leg"></div></div>
+    </div>
+    <div class="grid g2">
+      <div class="card"><h2>Prochains coupons</h2><p class="note">Coupons payables dans les 60 prochains jours (montant par obligation)</p><div class="scroll" style="max-height:300px"><table class="tbl compact" id="ob-cal"></table></div></div>
+      <div class="card"><h2>Par type d'émetteur</h2><p class="note">Lignes cotées, coupon moyen et rendement médian (lignes fiables ou estimées)</p><div class="scroll"><table class="tbl compact" id="ob-types"></table></div></div>
+    </div>
+    <div class="card">
+      <div class="card-h">
+        <div><h2>Toutes les obligations cotées</h2><p class="note">Triez en cliquant sur un en-tête. Cours en FCFA par obligation ; « % nominal » = cours rapporté au nominal restant.</p></div>
+        <div class="ctrls"><input type="search" id="ob-q" placeholder="Rechercher…"><select id="ob-type"></select><select id="ob-pays-sel"></select><select id="ob-fiab"><option value="">Toute fiabilité</option><option value="fiable">Fiable</option><option value="estimation">Estimation</option><option value="non significatif">Non significatif</option><option value="non calculable">Non calculable</option></select><span class="note" id="ob-count"></span></div>
+      </div>
+      <div class="scroll tall"><table class="tbl" id="ob-table"></table></div>
+    </div>
+    <details class="method"><summary>Comment lire ces chiffres</summary><dl>
+      <dt>Rendement courant</dt><dd>Coupon annuel / cours : revenu annuel en % du prix payé.</dd>
+      <dt>Rendement actuariel</dt><dd>Taux qui égalise le prix (cours + coupon couru) et les flux futurs (coupons et remboursements). Estimé : l'échéancier exact d'amortissement n'est pas publié dans le BOC, on suppose un remboursement constant jusqu'à l'échéance pour les obligations amortissables. Le prochain coupon retenu est le montant publié par le BOC.</dd>
+      <dt>Fiabilité</dt><dd>Pour chaque ligne : <b>fiable</b> (taux, échéance et échéancier connus) ; <b>estimation</b> (au moins une hypothèse : différé d'amortissement non publié, mois d'échéance supposé, taux déduit du coupon du BOC, coupon du BOC différent du taux de l'intitulé) ; <b>non significatif</b> (rendement hors de 0 % à 15 % ou échéance à moins de 3 mois, en général un cours de référence ancien) ; <b>non calculable</b> (taux variable, échéance absente ou incohérente). Seules les lignes fiables ou estimées entrent dans la courbe et les médianes. Survolez la colonne Fiabilité pour voir le motif et les hypothèses.</dd>
+      <dt>Duration modifiée</dt><dd>Sensibilité du prix aux taux : une duration de 3 signifie qu'une hausse des taux de 1 point fait baisser le prix d'environ 3 %.</dd>
+      <dt>Source</dt><dd>Bulletin Officiel de la Cote, publié par la BRVM le lendemain de chaque séance.</dd>
+    </dl></details>
+  </section>
+
+  <!-- HISTORIQUE -->
+  <section class="panel" data-panel="historique" hidden>
+    <div class="card"><h2>BRVM Composite : rendements mensuels</h2><p class="note">Chaque case est la variation du mois ; dernière colonne : l'année</p><div class="chart" id="monthly"></div></div>
+    <div class="grid g2">
+      <div class="card"><h2>Capitalisation du marché actions</h2><p class="note">Publiée par la BRVM à chaque séance collectée</p><div class="chart" id="capi" style="height:260px"></div></div>
+      <div class="card" id="q-card"><h2>Qualité des données</h2><p class="note">Complétude de la séance, statut des montants, contrôle, corrections de l'historique et ajustements</p><div id="q-detail"></div></div>
+      <div class="card"><h2>Suivi des mises à jour</h2><p class="note">Dernières opérations de mise à jour des données : séances ajoutées, bulletins lus, ajustements</p><ul class="log" id="journal"></ul></div>
+    </div>
+  </section>
+
+  <footer>Daily BRVM · CGF Bourse · données www.brvm.org · <span id="gen"></span></footer>
+</main>
+<div class="tip" id="tip"></div>
+<script src="vendor/d3.min.js"></script>
+<div class="fiche-ov" id="fiche-ov" hidden></div>
+<script src="app.js?v=20261113m"></script>
+</body>
+</html>
